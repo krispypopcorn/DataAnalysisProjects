@@ -1,0 +1,532 @@
+---
+title: "STA302A2"
+output:
+  pdf_document: default
+  word_document: default
+editor_options:
+  chunk_output_type: console
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+##ISHAAN NAGI 
+##1002452525
+
+SETUP
+```{r}
+setwd("~/Google Drive/Uni/Winter 2018/STA302/A2")
+dat <- read.table("Census.txt", sep = "" ,header=T)
+LIFE <- dat$LIFE
+MALE <- dat$MALE
+BIRTH <- dat$BIRTH
+DIVO <- dat$DIVO
+BEDS <- dat$BEDS
+EDUC <- dat$EDUC
+INCO <- dat$INCO
+y <- LIFE
+```
+
+1)
+```{r}
+x = as.matrix(dat)
+x <-x[1:51, 2:7]
+x<- cbind(1, x)
+mode(x) = 'numeric'
+n <- 51
+p <-6
+X<-x
+Xt <- t(X)
+XtX <- Xt %*% X
+XtXinv <-solve(XtX)
+Xty <- Xt %*% y
+bhat <- XtXinv %*% Xty
+```
+
+  1a)
+```{r}
+y_hat <- X %*% bhat
+y_hat
+```
+
+```{r}
+
+e_hat = y - y_hat
+e_hat
+```
+
+```{r}
+bhat
+```
+
+Equation:
+LIFE = 70.5577812705 + 0.1261018758 (MALE) - 0.5160557876 (BIRTH) - 0.1965375074 (DIVO) - 0.0033392036 (BEDS) + 0.2368222541 (EDUC) - 0.0003612011 (INCO) + e_hat
+  
+  
+  
+  1b)
+  - MALE
+```{r}
+  bhat[2] #b_1
+```
+
+b_1 (MALE) corresponds to the Expected change (+ 0.1261019) in the Averafe Lifespan with 1 unit increase in the proportion of Males to Female.
+  
+ - BIRTH
+```{r}
+bhat[3] #b_2
+```
+
+b_2 (BIRTH) corresponds to the Expected change (-0.5160558) in the Averafe Lifespan with a unit increase in the birth rate per 1,000 people.
+  
+  
+  1c)
+  
+```{r}
+RSS <- (t(e_hat) %*% e_hat)
+sigma_sq_hat = RSS / (n)
+sigma_sq_hat
+```
+
+
+
+```{r}
+s_sq = RSS / (n-p-1)
+s_sq
+```
+
+  1d)
+  
+```{r}
+s <-c(s_sq^(1/2))
+se_bs = diag(s * (XtXinv)^(1/2))
+se_bs
+#Corresponding to B_0, B_1 ... B_6
+```
+
+
+  1e)
+
+```{r}
+y_bar = c(sum(y_hat)/ n)
+SST <- sum((LIFE - y_bar)^(2))
+R_sq <- 1 - (RSS/SST)
+R_sq
+```
+
+Explains the proportion of variation in the Average lifespan explained by the regression, which is 46.849%.
+
+
+2)
+  2a)
+```{r}
+MLR <- lm(formula = LIFE~ MALE + BIRTH + DIVO + BEDS + EDUC + INCO, data=dat) 
+summary(MLR)
+```
+
+
+  2b)
+  $H_0: B_0 = B_1 = B_2 = B_3 = B_4 = B_5 = B_6 = 0$
+  $H_A: B_i \neq 0$ [any i in range 0 to 6]
+```{r}
+SSReg = SST-RSS
+F_val = (SSReg/(p)/(RSS/(n-p-1))) 
+F_val
+F_crt = qf(.95, df1=p, df2=n-p-1)
+F_crt
+```
+
+F_val > F_crit, hence we fail to accept $H_0$. Then atleast one of the B_i's [i = 1, ... 6] is not Zero.
+Our Model is significant.
+
+  2c)
+  
+#MALE
+  $H_0: B_1 = 0$
+  $H_A: B_1 \neq 0$
+```{r}
+t_value1 =2.670
+t_crit = qt(c(.005, .995), df=n-p-1)
+#t_crit = [-2.692278, 2.692278]
+```
+
+Since |t_crit| > |t_value1|, we accept $H_0$. Then $B_1 \neq 0$ and we can remove the predictor (MALE) from the model.
+
+#BIRTH
+  $H_0: B_2 = 0$
+  $H_A: B_2 != 0$
+```{r}
+t_value2 = 4.400
+t_crit = qt(c(.005, .995), df=n-p-1)
+#t_crit = [-2.692278, 2.692278]
+```
+
+Since |t_value2| > |t_crit|, we fail to accept $H_0$. Then $B_2 \neq 0$ then we can't remove the predictor (BIRTH) variable from the model. 
+
+#DIVO
+  $H_0: B_3 = 0$
+  $H_A: B_3 \neq 0$
+```{r}
+t_value3 =2.658
+t_crit = qt(c(.005, .995), df=n-p-1)
+#t_crit = [-2.692278, 2.692278]
+```
+
+Since |t_crit| > |t_value3|, we accept $H_0$. Then $B_3 \neq 0$ and we can remove the predictor (DIVO) from the model.
+
+#BEDS
+  $H_0: B4 = 0$
+  $H_A: B4 \neq 0$
+```{r}
+t_value4 =3.409
+t_crit = qt(c(.005, .995), df=n-p-1)
+#t_crit = [-2.692278, 2.692278]
+```
+
+Since |t_value4| > |t_crit|, we fail to accept $H_0$. Then $B_4 \neq 0$ then we can't remove the predictor (BEDS) variable from the model. 
+
+
+#EDUC
+  $H_0: B5 = 0$
+  $H_A: B5 \neq 0$
+```{r}
+t_value5 = 2.133
+t_crit = qt(c(.005, .995), df=n-p-1)
+#t_crit = [-2.692278, 2.692278]
+```
+
+Since |t_crit| > |t_value5|, we accept $H_0$. Then $B_3 \neq 0$ and we can remove the predictor (EDUC) from the model.
+
+#INCO
+  $H_0: B6 = 0$
+  $H_A: B6 \neq 0$
+```{r}
+t_value6 =0.786
+t_crit = qt(c(.005, .995), df=n-p-1)
+#t_crit = [-2.692278, 2.692278]
+```
+
+Since |t_crit| > |t_value6|, we accept $H_0$. Then $B_6 \neq 0$ and we can remove the predictor (INCO) from the model.
+
+Yes, the results indicate that variables  MALE (x1), DIVO (x3), EDUC (x5) and INCO x(6) should be removed.
+
+
+  2d)
+  
+```{r}
+MLR_reduced <- lm(formula = LIFE~ BIRTH + BEDS, data=dat) 
+summary(MLR_reduced)
+```
+
+LIFE = 79.1473186 - 0.3281679 (BIRTH) - 0.0027415 (BEDS)
+
+
+  2e)
+  $H_0: B_1 = B_6 = 0$
+  $H_A: B_1, B_6$ both not zero.
+  
+```{r}
+MLR_red_MALE_INCO <- lm(formula = LIFE~ BIRTH + BEDS + DIVO + EDUC, data=dat) 
+anova(MLR, MLR_red_MALE_INCO)
+F_val = 3.5642
+F_Crit =  qf(.99, df1=2, df2=n-p-1)
+#F_Crit = 5.122628
+```
+
+|F_val| > |F_crit| we fail to reject $H_0$, hence the predictors MALE and INCO can be removed from the model. 
+
+  2f)
+```{r}
+MLR_MALE <- lm(LIFE ~ MALE, data=dat) 
+anova(MLR, MLR_MALE)
+F_val = 7.0963
+```
+
+As per ANOVA Output, our F test Statistic is 7.0963.
+
+  2g)
+  $H_0: B_i = 0$ [i = 1, 2]
+  $H_A:$ $B_1, B_2$ , both not zero.
+  
+```{r}
+MLR_B0 = lm(LIFE ~ 1, data=dat) 
+MLR_MALE_BIRTH <- lm(LIFE ~ MALE + BIRTH, data=dat) 
+anova(MLR_B0, MLR_MALE_BIRTH)
+F_val = 8.14
+```
+
+We fail to accept the $H_0$, we infer that (MALE) x1 and(BIRTH) x2 are significant/useful in predicting the response.
+
+
+  2h)
+```{r}
+MLR_B0 = lm(LIFE ~ 1, data=dat) 
+MLR_B0B3 = lm(LIFE ~ DIVO)
+MLR_B0B2B3 = lm(LIFE ~ BIRTH + DIVO)
+MLR_MALE_BIRTH_DIVO <- lm(LIFE~ MALE + BIRTH + DIVO, data=dat) 
+MLR_BIRTH_DIVO <- lm(LIFE ~ BIRTH + DIVO, data=dat) 
+
+
+```
+
+```{r}
+SSRegB3B0 <- anova(MLR_B0)["Residuals", "Sum Sq"] - anova(MLR_B0B3)["Residuals", "Sum Sq"]
+SSRegB3B0
+```
+
+
+```{r}
+SSRegB2_B0B3 <- anova(MLR_B0B3)["Residuals", "Sum Sq"] - anova(MLR_B0B2B3)["Residuals", "Sum Sq"]
+SSRegB2_B0B3
+```
+
+
+```{r}
+RSSB0B1B2B3 <- anova(MLR_MALE_BIRTH_DIVO)["Residuals", "Sum Sq"]
+
+RSS_B0B2B3 <- anova(MLR_BIRTH_DIVO)["Residuals", "Sum Sq"] 
+
+SSRegB1_B0B2B3 <- RSS_B0B2B3 - RSSB0B1B2B3
+SSRegB1_B0B2B3
+
+```
+
+
+```{r}
+SSRegB1B2B3_B0 =  SSRegB3B0 + SSRegB2_B0B3 + SSRegB1_B0B2B3
+SSRegB1B2B3_B0
+```
+
+  2i)
+      - 2i) (1)
+    
+```{r}
+#MLR_B0
+#MLR_MALE
+MLR_BIRTH <- lm(LIFE ~ BIRTH, data=dat) 
+MLR_DIVO <- lm(LIFE ~ DIVO, data=dat) 
+MLR_INCO <- lm(LIFE ~ INCO, data=dat) 
+#MLR_MALE_BIRTH
+MLR_MALE_DIVO <- lm(LIFE~ MALE + DIVO, data=dat) 
+MLR_MALE_INCO <- lm(LIFE~ MALE + INCO, data=dat) 
+#MLR_BIRTH_DIVO
+MLR_BIRTH_INCO <- lm(LIFE ~ BIRTH + INCO, data=dat) 
+MLR_DIVO_INCO <- lm(LIFE ~ DIVO + INCO, data=dat) 
+MLR_MALE_BIRTH_DIVO
+MLR_MALE_BIRTH_INCO <- lm(LIFE~ MALE + BIRTH + INCO, data=dat) 
+MLR_BIRTH_DIVO_INCO <- lm(LIFE ~ BIRTH + DIVO + INCO, data=dat) 
+MLR_MALE_DIVO_INCO <- lm(LIFE ~ MALE + DIVO + INCO, data=dat) 
+MLR_mbdi <- lm(LIFE ~ MALE + BIRTH + DIVO + INCO, data=dat) 
+
+#AIC
+aic_b0 <- AIC(MLR_B0) 
+aic_b0
+aic_m <- AIC(MLR_MALE) 
+aic_m
+aic_d <- AIC(MLR_DIVO)
+aic_d
+aic_i <- AIC(MLR_INCO)
+aic_i
+aic_b <- AIC(MLR_BIRTH)
+aic_b
+aic_mb <- AIC(MLR_MALE_BIRTH)
+aic_mb
+aic_md <- AIC(MLR_MALE_DIVO)
+aic_md
+aic_mi <- AIC(MLR_MALE_INCO)
+aic_mi
+aic_bd <- AIC(MLR_BIRTH_DIVO)
+aic_bd
+aic_bi <- AIC(MLR_BIRTH_INCO)
+aic_bi
+aic_di <- AIC(MLR_DIVO_INCO)
+aic_di
+aic_mbd <- AIC(MLR_MALE_BIRTH_DIVO)
+aic_mbd
+aic_mbi <- AIC(MLR_MALE_BIRTH_INCO)
+aic_mbi
+aic_bdi <- AIC(MLR_BIRTH_DIVO_INCO)
+aic_bdi
+aic_mdi <- AIC(MLR_MALE_DIVO_INCO)
+aic_mdi
+aic_mbdi <- AIC(MLR_mbdi)
+aic_mbdi
+```
+
+Lowest AIC is with model LIFE ~ BIRTH + MALE + DIVO
+
+      - 2i) (2)
+```{r}
+null<- MLR_B0
+full<- MLR_mbdi
+forwdAIC=step(null, scope=list(lower=null, upper=full), direction="forward")
+forwdAIC
+```
+
+Best Model according to forwardAIC is LIFE ~ BIRTH + MALE + DIVO
+
+      - 2i) (3)
+```{r}
+backAIC=step(full, direction="backward", data=dat)
+backAIC
+```
+
+Best Model according to backwardAIC is LIFE ~ BIRTH + MALE + DIVO
+
+
+3)
+
+  3a)
+  
+```{r}
+std_res <- rstandard(MLR)
+plot(MLR$fitted.values, std_res, ylab="Standardized Residuals", xlab="Fitted Values", main="Standardized Residuals")
+abline(0, 0)
+abline(2, 0, col=c("red"))
+abline(-2, 0, col=c("red"))
+```
+
+Yes, there are 3 points with residuals greater than |2| and an outlier that may be influential with the lowest fitted value (~67).
+
+  3b)
+```{r}
+lev = hat(model.matrix(MLR))
+plot(lev)
+abline(0.5, 0, col=c("red"))
+dat[lev >0.5,]
+```
+
+3 points have lev > 0.5. Indices 1, 8 and 34. Corresponding to States: AK, DC and NV.
+
+  3c)
+```{r}
+cook = cooks.distance(MLR)
+plot(cook)
+dat[cook > 1,]
+```
+
+No, not all Observations are the same. We now see data corresponding to UT instead of NV.
+
+
+  3d)
+```{r}
+plot(BEDS, std_res, ylab="Standardized Residuals", 
+     xlab="BEDS", main="Standardized Residuals")
+abline(0, 0)
+abline(2, 0, col=c("red"))
+abline(-2, 0, col=c("red"))
+points(BEDS[8], std_res[8] , col='red', pch = 19)
+```
+
+There are 3 points that are outliers based on std_res (>2) and the outlier red point corresponding to DC (RED)
+
+
+  3e)
+
+```{r}
+dat2 <- subset(dat, STATE != 'DC')
+LIFE2 <- dat2$LIFE
+MALE2 <- dat2$MALE
+BIRTH2 <- dat2$BIRTH
+DIVO2 <- dat2$DIVO
+BEDS2 <- dat2$BEDS
+EDUC2 <- dat2$EDUC
+INCO2 <- dat2$INCO
+MLR_NoDC <- lm(formula = LIFE2 ~ MALE2 + BIRTH2 + DIVO2 + BEDS2 + EDUC2 + INCO2, data=dat2)
+summary(MLR_NoDC)
+std_res_NoDC <- rstandard(MLR_NoDC)
+plot(MLR_NoDC$fitted.values, std_res_NoDC, ylab="Standardized Residuals", xlab="Fitted Values", main="Standardized Residuals")
+abline(0, 0)
+abline(2, 0, col=c("red"))
+abline(-2, 0, col=c("red"))
+```
+
+
+Yes there is a noticeable change in the Standardised residuals. 
+The fitted line has changed.
+NEW:
+  - LIFE = 69.8207566 + 0.0922054 (MALE2) - 0.4261398 (BIRTH2) - 0.1377833 (DIVO2) - 0.0011637 (BEDS2) + 0.3157699 (EDUC2) - 0.0004698 (INCO2)
+OLD:
+- LIFE = 70.5577813 + 0.1261019 (MALE2) - 0.5160558 (BIRTH2) - 0.1965375 (DIVO2) - 0.0033392 (BEDS2) + 0.2368223 (EDUC2) - 0.0003612 (INCO2)
+
+Also, $R^2$s changed:
+New: Multiple R-squared:  0.3679
+Old: Multiple R-squared:  0.4685
+
+  f)
+  
+```{r}
+#MALE
+plot(MALE2, std_res_NoDC, ylab="Standardized Residuals", xlab="MALE", main="Standardized Residuals")
+abline(0, 0)
+abline(2, 0, col=c("red"))
+abline(-2, 0, col=c("red"))
+points(MALE[44], std_res_NoDC[44] , col='red', pch = 19)
+
+#BEDS
+plot(BIRTH2, std_res_NoDC, ylab="Standardized Residuals", xlab="BIRTH", main="Standardized Residuals")
+abline(0, 0)
+abline(2, 0, col=c("red"))
+abline(-2, 0, col=c("red"))
+points(BIRTH2[44], std_res_NoDC[44] , col='red', pch = 19)
+
+#DIVO
+plot(DIVO2, std_res_NoDC, ylab="Standardized Residuals", xlab="DIVO", main="Standardized Residuals")
+abline(0, 0)
+abline(2, 0, col=c("red"))
+abline(-2, 0, col=c("red"))
+points(DIVO[44], std_res_NoDC[44] , col='red', pch = 19)
+
+#BEDS
+plot(BEDS2, std_res_NoDC, ylab="Standardized Residuals", xlab="BEDS", main="Standardized Residuals")
+abline(0, 0)
+abline(2, 0, col=c("red"))
+abline(-2, 0, col=c("red"))
+points(BEDS2[44], std_res_NoDC[44] , col='red', pch = 19)
+
+#EDUC
+plot(EDUC2, std_res_NoDC, ylab="Standardized Residuals", xlab="EDUC", main="Standardized Residuals")
+abline(0, 0)
+abline(2, 0, col=c("red"))
+abline(-2, 0, col=c("red"))
+points(EDUC2[44], std_res_NoDC[44] , col='red', pch = 19)
+
+#INCO
+plot(INCO2, std_res_NoDC, ylab="Standardized Residuals", xlab="INCO", main="Standardized Residuals")
+abline(0, 0)
+abline(2, 0, col=c("red"))
+abline(-2, 0, col=c("red"))
+points(INCO2[44], std_res_NoDC[44] , col='red', pch = 19)
+```
+ALL Data corresponding to this STATE has very standardized residual values.
+Difference between observations and expected values is large.
+
+
+
+  3g)
+```{r}
+dat3 <- subset(dat2, STATE != 'UT')
+LIFE3 <- dat3$LIFE
+MALE3 <- dat3$MALE
+BIRTH3 <- dat3$BIRTH
+DIVO3 <- dat3$DIVO
+BEDS3 <- dat3$BEDS
+EDUC3 <- dat3$EDUC
+INCO3 <- dat3$INCO
+MLR_NoDC_NoUT <- lm(formula = LIFE3 ~ MALE3+ BIRTH3 + DIVO3 + BEDS3 + EDUC3 + INCO3, data=dat3)
+```
+
+
+$R^2$ is higher without UT data. Therefore this model explains the proportion of variability explained by the regression, better.
+Predictor have coefficients chnaged:
+```{r}
+MLR_NoDC_NoUT$coefficients
+```
+
+Vs
+```{r}
+MLR$coefficients
+```
+
+
