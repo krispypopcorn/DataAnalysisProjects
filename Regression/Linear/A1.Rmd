@@ -1,0 +1,164 @@
+---
+title: "STA302-A1"
+output:
+  word_document: default
+  pdf_document: default
+editor_options: 
+  chunk_output_type: console
+---
+
+## Ishaan Nagi
+##1002452525
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+SETUP
+```{r}
+setwd("~/Google Drive/Uni/Winter 2018/STA302/A1")
+Dat=read.table("GPA.txt", header=F) 
+# change column names 
+names(Dat)<-c("GPA","ACT")
+# print the six first observations head(Dat)
+Dat <- Dat[, c("ACT", "GPA")]
+n = nrow(Dat)
+```
+
+
+(a)
+```{r}
+gpa <- Dat[,2]
+act <- Dat[,1]
+mu_hat_act <- mean(act)
+mu_hat_gpa <- mean(gpa)
+var_gpa <- var(gpa)
+var_act <- var(act)
+```
+mu_hat_act = 24.725
+mu_hat_gpa =  3.07405
+var_act = 19.99937
+var_gpa = 0.4151719
+
+
+
+(b) 
+```{r}
+corr_ACT_GPA <- cor(gpa, act)
+```
+corr_ACT_GPA = 0.2694818;
+Weak positive correlation.
+
+
+
+(c)
+```{r}
+x <- act
+y <- gpa
+fit.Gpa <- lm(GPA ~ ACT, data=Dat)
+```
+
+
+(d) b0(intercept) = 2.11404929, b1(slope) =  0.03882713.
+[from coef(fit.Gpa) output]
+
+
+
+(e) For every unit change in the ACT score there is an change in the GPA score by 0.3882713.
+
+
+
+(f)
+```{r}
+b0 = 2.11404929
+b1 = 0.03882713 
+RSS <-sum(resid(fit.Gpa)^2)
+s_square = RSS / (n-2)
+s = (s_square)^(0.5)
+```
+s = 0.623125 is the SD around regression line.
+
+
+
+(g)
+
+```{r}
+# H_0: B1 = 0
+# H_A: B1 != 0
+
+y_mean <- mu_hat_gpa
+x_mean <- mu_hat_act
+std_error_B1 <- ((s_square)/(sum((x - x_mean)^2)))^(1/2)
+t_stat <- (b1) / (std_error_B1)
+```
+t-stat =  3.040
+t-value = 1.980	
+Since t-value < t-stat, we reject the H_0.
+Then b1 is not 0 and there is a linear relationship between ACT scores and GPA.
+
+
+
+(h)
+```{r}
+coef(fit.Gpa) #b0 and b1
+plot(y~x, data=Dat, col="red", pch=19, xlab="ACT", ylab="GPA", xlim=c(0,40))
+abline(coef(fit.Gpa), col="orange")
+abline(v=x_mean, h=y_mean, lty=2)
+title('Scatter PLot and the Line of the best fit for ACT and GPA data')
+```
+
+(i)
+```{r}
+anova(fit.Gpa)
+```
+
+(j)
+
+```{r}
+mse <- RSS/n-2
+# [from table]
+```
+mse = RSS/n-2 = 0.3883
+
+
+(k)
+
+```{r}
+# H_0: B1 = 0
+# H_A: B1 != 0
+```
+
+f-value = 0.002917
+f(.05, 1, 118) = 3.9201	#f-stat
+Since f-value < f-stat, we reject the H_0.
+Then b1 is not 0 and there is a linear relationship between ACT scores and GPA.
+
+
+(l)
+The results in part k and g are the same.
+
+
+(m)
+```{r}
+r.squared <- 0.0726
+#[From str(summary(fit.Gpa)) output]
+```
+Only 7.26% of the variation in GPA explained by the regression model
+
+
+(n)
+```{r}
+gpa <- data.frame(ACT=28)
+CI_gpa_28 <- predict(fit.Gpa, gpa, interval="confidence", level = 0.95, se.fit = TRUE)
+```
+CI_GPA_28 -> [3.061384, 3.341033]
+We are 95% confident that the mean GPA of students whose ACT score was 28 will lie within the above bounds.
+
+
+
+(o)
+```{r}
+PI_gpa_20 <- predict(fit.Gpa, gpa, interval="prediction", level = 0.95, se.fit = TRUE)
+```
+PI_GPA_20 -> [1.645753 4.13543]
+We can Predict that a GPA of a student with ACT score 20 will have in the range given above. [95% of the time]
